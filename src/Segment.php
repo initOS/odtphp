@@ -315,8 +315,9 @@ IMG;
       return call_user_func_array([$this, 'setVars'], $args);
     }
     catch (SegmentException $e) {
-      throw new SegmentException("method $meth nor var $meth exist");
+      # Silently ignore setting unused variables.
     }
+    return $this;
   }
 
   /**
