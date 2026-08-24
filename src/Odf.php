@@ -620,7 +620,9 @@ IMG;
     }
     $string = $segment->getName();
     $reg = '@\[!--\sBEGIN\s' . $string . '\s--\](.*)\[!--.+END\s' . $string . '\s--\]@smU';
-    $this->contentXml = preg_replace($reg, $segment->getXmlParsed(), $this->contentXml);
+    # In case there are multiple segments with the same name, do substitute
+    # only within the first one, because `setSegment` only determines that first one.
+    $this->contentXml = preg_replace($reg, $segment->getXmlParsed(), $this->contentXml, 1);
     foreach ($segment->manifestVars as $val) {
       // Copy all segment image names into current array.
       $this->manifestVars[] = $val;
@@ -668,7 +670,7 @@ IMG;
    *   TRUE when segment exists, FALSE otherwise.
    */
   public function segmentExists($segment): bool {
-    $reg = "#\[!--\sBEGIN\s$segment\s--](.*?)\[!--\sEND\s$segment\s--]#smU";
+    $reg = "#\[!--\sBEGIN\s$segment\s--](.*)\[!--\sEND\s$segment\s--]#smU";
     return preg_match($reg, html_entity_decode($this->contentXml), $m) != 0;
   }
 
@@ -688,7 +690,7 @@ IMG;
     if (array_key_exists($segment, $this->segments)) {
       return $this->segments[$segment];
     }
-    $reg = "#\[!--\sBEGIN\s$segment\s--\](.*?)\[!--\sEND\s$segment\s--\]#smU";
+    $reg = "#\[!--\sBEGIN\s$segment\s--\](.*)\[!--\sEND\s$segment\s--\]#smU";
     if (preg_match($reg, html_entity_decode($this->contentXml), $m) == 0) {
       throw new OdfException("'$segment' segment not found in the document");
     }
