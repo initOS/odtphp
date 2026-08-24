@@ -677,22 +677,18 @@ IMG;
   /**
    * Declare a segment in order to use it in a loop.
    *
+   * Finds the first one of the specified name, if any.
+   *
    * @param string $segment
    *   The name of the segment to declare.
    *
-   * @throws \Odtphp\Exceptions\OdfException
-   *   When the segment cannot be found in the document.
-   *
-   * @return \Odtphp\Segment
-   *   The requested segment object for use in a loop.
+   * @return \Odtphp\Segment|NULL
+   *   The requested segment object for use in a loop, if any, otherwise NULL.
    */
-  public function setSegment($segment): Segment {
-    if (array_key_exists($segment, $this->segments)) {
-      return $this->segments[$segment];
-    }
+  public function setSegment($segment): ?Segment {
     $reg = "#\[!--\sBEGIN\s$segment\s--\](.*)\[!--\sEND\s$segment\s--\]#smU";
     if (preg_match($reg, html_entity_decode($this->contentXml), $m) == 0) {
-      throw new OdfException("'$segment' segment not found in the document");
+      return NULL;
     }
     $this->segments[$segment] = new Segment($segment, $m[1], $this);
     return $this->segments[$segment];
